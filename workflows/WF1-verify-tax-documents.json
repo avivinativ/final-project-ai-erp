@@ -1,0 +1,183 @@
+{
+  "name": "WF1 - אימות מסמכי מס והכנסתם לתור הפקה",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "authentication": "airtableTokenApi",
+        "baseId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "app8cwZVO7nUF6ErS"
+        },
+        "tableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tbliF2WhmHvgKHlMg"
+        },
+        "triggerField": "Created",
+        "additionalFields": {}
+      },
+      "id": "fb7f5365-2183-45e9-9d37-28d9aafeb379",
+      "name": "טריגר חשבוניות חדשות",
+      "type": "n8n-nodes-base.airtableTrigger",
+      "typeVersion": 1,
+      "position": [0, 0],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "QbC6k0gPl10eEHOV",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "invoice-number",
+              "name": "InvoiceNumber",
+              "type": "string",
+              "value": "={{ \"INV-\" + $now.toFormat(\"yyyyMMddHHmm\") }}"
+            },
+            {
+              "id": "vat-amount",
+              "name": "VatAmount",
+              "type": "number",
+              "value": "={{ Math.round($json.fields.Amount * ($now.toISODate() >= \"2025-01-01\" ? 0.18 : 0.17) * 100) / 100 }}"
+            },
+            {
+              "id": "total",
+              "name": "Total",
+              "type": "number",
+              "value": "={{ Math.round(($json.fields.Amount + $json.fields.Amount * ($now.toISODate() >= \"2025-01-01\" ? 0.18 : 0.17)) * 100) / 100 }}"
+            },
+            {
+              "id": "status",
+              "name": "Status",
+              "type": "string",
+              "value": "ValidatedQueued"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "89c5c726-8240-444a-9078-9550e9f328c9",
+      "name": "חישוב מעמ וסהכ",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [224, 0]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "app8cwZVO7nUF6ErS"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tbliF2WhmHvgKHlMg"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "InvoiceNumber": "={{ $json.InvoiceNumber }}",
+            "VatAmount": "={{ $json.VatAmount }}",
+            "Total": "={{ $json.Total }}",
+            "Status": "={{ $json.Status }}"
+          },
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "InvoiceNumber",
+              "displayName": "InvoiceNumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "VatAmount",
+              "displayName": "VatAmount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Total",
+              "displayName": "Total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "matchingColumns": ["id"]
+        },
+        "options": {}
+      },
+      "id": "41265bce-81c9-4676-a890-56ddeb3d4dbf",
+      "name": "עדכון חשבונית",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [448, 0],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "QbC6k0gPl10eEHOV",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "טריגר חשבוניות חדשות": {
+      "main": [[{ "node": "חישוב מעמ וסהכ", "type": "main", "index": 0 }]]
+    },
+    "חישוב מעמ וסהכ": {
+      "main": [[{ "node": "עדכון חשבונית", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}
