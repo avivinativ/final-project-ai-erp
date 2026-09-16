@@ -1,0 +1,254 @@
+{
+  "name": "WF3 - קליטת אנשי קשר וסינון כפילויות",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "authentication": "airtableTokenApi",
+        "baseId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "app8cwZVO7nUF6ErS"
+        },
+        "tableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tbl5JEP9PGG8aYuHx"
+        },
+        "triggerField": "Created",
+        "additionalFields": {}
+      },
+      "id": "3797bb16-a8ce-40df-b3bb-98b43726433d",
+      "name": "טריגר ליד חדש",
+      "type": "n8n-nodes-base.airtableTrigger",
+      "typeVersion": 1,
+      "position": [-912, 96],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "QbC6k0gPl10eEHOV",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "app8cwZVO7nUF6ErS"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tbl5JEP9PGG8aYuHx"
+        },
+        "filterByFormula": "={{ \"{Email} = \\\"\" + $json.fields.Email + \"\\\"\" }}",
+        "options": {}
+      },
+      "id": "58c1ead6-c7ea-4dd7-b1fe-b0f7244e5435",
+      "name": "חיפוש כפילויות לפי אימייל",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [-688, 96],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "QbC6k0gPl10eEHOV",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "field": "fields.Email"
+            }
+          ]
+        },
+        "options": {
+          "outputFormat": "singleItem"
+        }
+      },
+      "id": "bff02680-b1f3-447d-81c1-61c42158809d",
+      "name": "ספירת התאמות",
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [-464, 96]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.Email_count }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              },
+              "rightValue": 1
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "6473470f-7eac-460d-be7a-829e73690f50",
+      "name": "כפילות",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [-240, 96]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "app8cwZVO7nUF6ErS"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tbl5JEP9PGG8aYuHx"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('טריגר ליד חדש').item.json.id }}",
+            "Status": "Duplicate"
+          },
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "matchingColumns": ["id"]
+        },
+        "options": {}
+      },
+      "id": "d85070d0-06d6-4822-bd47-e3950f484dc9",
+      "name": "סימון כפילות",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [0, 0],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "QbC6k0gPl10eEHOV",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "app8cwZVO7nUF6ErS"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tbl5JEP9PGG8aYuHx"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('טריגר ליד חדש').item.json.id }}",
+            "Status": "New"
+          },
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "matchingColumns": ["id"]
+        },
+        "options": {}
+      },
+      "id": "2dc99daf-29c9-46f3-b700-c6ae2d61da9e",
+      "name": "סימון ליד חדש",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [0, 192],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "QbC6k0gPl10eEHOV",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "טריגר ליד חדש": {
+      "main": [[{ "node": "חיפוש כפילויות לפי אימייל", "type": "main", "index": 0 }]]
+    },
+    "חיפוש כפילויות לפי אימייל": {
+      "main": [[{ "node": "ספירת התאמות", "type": "main", "index": 0 }]]
+    },
+    "ספירת התאמות": {
+      "main": [[{ "node": "כפילות", "type": "main", "index": 0 }]]
+    },
+    "כפילות": {
+      "main": [
+        [{ "node": "סימון כפילות", "type": "main", "index": 0 }],
+        [{ "node": "סימון ליד חדש", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}
