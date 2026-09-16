@@ -1,0 +1,198 @@
+{
+  "name": "WF9 - סוכן המנהל",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": ["message"],
+        "additionalFields": {}
+      },
+      "id": "f119f6ef-9450-46d0-af37-0ce1acc36705",
+      "name": "טריגר טלגרם - מנהל",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [-464, 96],
+      "webhookId": "952c2304-1b98-4678-ada4-3d5f4e00158b",
+      "credentials": {
+        "telegramApi": {
+          "id": "RVrYZVkmQ9HqDamx",
+          "name": "בוט מנהל"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.message.chat.id }}",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              },
+              "rightValue": 5643627322,
+              "id": "fa1485d9-47d5-42f4-b7d7-ee5af9a41576"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "cd00fb7d-2e72-4065-9075-8810af965890",
+      "name": "האם זה המנהל",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [-240, 96]
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "app8cwZVO7nUF6ErS"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tbliF2WhmHvgKHlMg"
+        },
+        "returnAll": false,
+        "options": {}
+      },
+      "id": "603e2f10-a587-4735-94fc-fa51c6b5ec22",
+      "name": "שליפת חשבוניות",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [0, 0],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "QbC6k0gPl10eEHOV",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "invoices",
+        "options": {}
+      },
+      "id": "8c22ce0d-47e3-4bc0-9530-efb40ca9dc64",
+      "name": "איחוד נתוני חשבוניות",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [208, 0]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ \"שאלת המנהל: \" + $('טריגר טלגרם - מנהל').item.json.message.text + \"\\n\\nנתוני עד 100 חשבוניות אחרונות (JSON): \" + JSON.stringify($json.invoices) }}",
+        "options": {
+          "systemMessage": "אתה עוזר אישי של מנהל העסק, עונה בעברית בטלגרם. יש לך גישה לנתוני החשבוניות שסופקו לך בהודעה (עד 100 חשבוניות אחרונות). ענה על שאלות לגבי הכנסות, סטטוס חשבוניות ולקוחות על סמך הנתונים הללו בלבד. אין לך כלים נוספים ואינך יכול ליצור משימות או לבצע פעולות - רק לענות על שאלות."
+        }
+      },
+      "id": "208d92b8-9714-4309-b2dd-2b14c73b2c4b",
+      "name": "סוכן המנהל",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [400, 0]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini",
+          "cachedResultName": "gpt-5-mini",
+          "cachedResultUrl": ""
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "a761f5ba-cd24-40f3-a80b-463ab940fc34",
+      "name": "מודל סוכן מנהל",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [368, 224],
+      "credentials": {
+        "openAiApi": {
+          "id": "XJFfFM4hQXksnuVj",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('טריגר טלגרם - מנהל').item.json.message.chat.id }}",
+        "contextWindowLength": 10
+      },
+      "id": "a645a95e-da2a-474d-9f9f-5f0e21b745e1",
+      "name": "זיכרון שיחת מנהל",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [496, 224]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('טריגר טלגרם - מנהל').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "78a17318-104a-4e97-9776-1175bb53ada4",
+      "name": "תשובה למנהל",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [656, 0],
+      "webhookId": "ad94799a-ce98-4f1a-afca-3f4a8e2aa0fa",
+      "credentials": {
+        "telegramApi": {
+          "id": "RVrYZVkmQ9HqDamx",
+          "name": "בוט מנהל"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "טריגר טלגרם - מנהל": {
+      "main": [[{ "node": "האם זה המנהל", "type": "main", "index": 0 }]]
+    },
+    "האם זה המנהל": {
+      "main": [[{ "node": "שליפת חשבוניות", "type": "main", "index": 0 }]]
+    },
+    "שליפת חשבוניות": {
+      "main": [[{ "node": "איחוד נתוני חשבוניות", "type": "main", "index": 0 }]]
+    },
+    "איחוד נתוני חשבוניות": {
+      "main": [[{ "node": "סוכן המנהל", "type": "main", "index": 0 }]]
+    },
+    "סוכן המנהל": {
+      "main": [[{ "node": "תשובה למנהל", "type": "main", "index": 0 }]]
+    },
+    "מודל סוכן מנהל": {
+      "ai_languageModel": [[{ "node": "סוכן המנהל", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "זיכרון שיחת מנהל": {
+      "ai_memory": [[{ "node": "סוכן המנהל", "type": "ai_memory", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}
