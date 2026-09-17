@@ -16,7 +16,10 @@
       "name": "כל דקה",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.4,
-      "position": [0, 0]
+      "position": [
+        0,
+        0
+      ]
     },
     {
       "parameters": {
@@ -40,7 +43,10 @@
       "name": "שליפת חשבוניות בתור",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.2,
-      "position": [224, 0],
+      "position": [
+        224,
+        0
+      ],
       "credentials": {
         "airtableTokenApi": {
           "id": "QbC6k0gPl10eEHOV",
@@ -67,24 +73,29 @@
       "name": "בניית HTML",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
-      "position": [448, 0]
+      "position": [
+        448,
+        0
+      ]
     },
     {
       "parameters": {
-        "authentication": "serviceAccount",
         "operation": "createFromText",
         "content": "={{ $json.invoiceHtml }}",
         "name": "={{ $json.fields.InvoiceNumber + \".html\" }}",
         "driveId": {
           "__rl": true,
           "mode": "list",
-          "value": "My Drive"
+          "value": "My Drive",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
         },
         "folderId": {
           "__rl": true,
           "mode": "list",
-          "value": "root",
-          "cachedResultName": "/ (Root folder)"
+          "value": "",
+          "cachedResultName": "",
+          "cachedResultUrl": ""
         },
         "options": {}
       },
@@ -92,11 +103,14 @@
       "name": "העלאה לדרייב",
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
-      "position": [672, 0],
+      "position": [
+        672,
+        0
+      ],
       "credentials": {
-        "googleApi": {
-          "id": "WgIOpk8xARNzxz3Y",
-          "name": "Google Service Account account"
+        "googleDriveOAuth2Api": {
+          "id": "hX7kWjSrQx00H4Yk",
+          "name": "Google Drive account"
         }
       }
     },
@@ -149,7 +163,9 @@
               "canBeUsedToMatch": false
             }
           ],
-          "matchingColumns": ["id"]
+          "matchingColumns": [
+            "id"
+          ]
         },
         "options": {}
       },
@@ -157,7 +173,10 @@
       "name": "עדכון חשבונית שהופקה",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.2,
-      "position": [880, 0],
+      "position": [
+        880,
+        0
+      ],
       "credentials": {
         "airtableTokenApi": {
           "id": "QbC6k0gPl10eEHOV",
@@ -168,16 +187,48 @@
   ],
   "connections": {
     "כל דקה": {
-      "main": [[{ "node": "שליפת חשבוניות בתור", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "שליפת חשבוניות בתור",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "שליפת חשבוניות בתור": {
-      "main": [[{ "node": "בניית HTML", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "בניית HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "בניית HTML": {
-      "main": [[{ "node": "העלאה לדרייב", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "העלאה לדרייב",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "העלאה לדרייב": {
-      "main": [[{ "node": "עדכון חשבונית שהופקה", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "עדכון חשבונית שהופקה",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -185,7 +236,16 @@
     "binaryMode": "separate",
     "availableInMCP": true
   },
-  "staticData": null,
+  "staticData": {
+    "node:כל דקה": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
   "pinData": {},
   "meta": {
     "templateCredsSetupCompleted": true

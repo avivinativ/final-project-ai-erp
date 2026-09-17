@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI-ERP
 
-## Getting Started
+Next.js admin app for a small no-code AI-ERP system, built as a final project. Automations live in n8n (10 workflows + 3 AI agents + a RAG vector store), data lives in Airtable, and this app is the Lovable/Base44-style admin dashboard — built as real Next.js code instead.
 
-First, run the development server:
+## Architecture
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+this app (Next.js)  →  n8n webhook (WF13)  →  Airtable (data)
+      ↑ reads directly from Airtable REST API for display
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Reads** (dashboard, leads/tasks/invoices/products lists): server-side calls straight to the Airtable REST API (`src/lib/airtable.ts`), using `AIRTABLE_PAT` / `AIRTABLE_BASE_ID`.
+- **Writes and chat**: always go through the single n8n webhook (`src/lib/n8n.ts` → `N8N_WEBHOOK_URL`), which is workflow **WF13 - קליטת קריאות מהאפליקציה**. It routes by an `action` field: `chat`, `createLead`, `createTask`, `createInvoice`.
+- The n8n side (10 workflows, imported from the course build) also runs independently of this app: Telegram bots for the manager and for customer service, scheduled cold-email/follow-up agents, invoice VAT calculation, and PDF generation to Drive.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+cp .env.local.example .env.local   # fill in the values below
+npm run dev
+```
 
-## Learn More
+Environment variables (`.env.local`):
 
-To learn more about Next.js, take a look at the following resources:
+| Var | Purpose |
+|---|---|
+| `AIRTABLE_PAT` | Airtable Personal Access Token, read access to the base |
+| `AIRTABLE_BASE_ID` | The Airtable base (`app8cwZVO7nUF6ErS`) |
+| `N8N_WEBHOOK_URL` | Production URL of WF13's webhook — currently `https://n8n.nativ-ai.co.il/webhook/ai-erp-app` (self-hosted n8n on Hetzner/Docker; **not** the old n8n Cloud instance) |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## n8n workflows
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+All 10 live on the self-hosted n8n instance (`n8n.nativ-ai.co.il`). Numbering isn't contiguous (2, 10, 11, 12 don't exist) — inherited from the course spec.
 
-## Deploy on Vercel
+| Workflow | Trigger | Purpose |
+|---|---|---|
+| WF1 | Airtable poll (Invoices, every min) | Validates a new invoice, computes VAT + total, marks `ValidatedQueued` |
+| WF3 | Airtable poll (Leads, every min) | Marks a new lead `Duplicate` (by email) or `New` |
+| WF4a | Schedule (every 3h) | Sends one cold sales email to a `New` lead, marks it contacted |
+| WF4b | Gmail poll (every 30 min) | Classifies a lead's email reply (interested / not / question) and updates status |
+| WF5 | Telegram (customer bot) | Customer-service agent, answers from the policies + products vector store |
+| WF6 | Manual only | Loads the policy text into the in-memory vector store (`policies`) |
+| WF7 | Manual only | Loads all Airtable products into the in-memory vector store (`products`) |
+| WF8 | Schedule (every min) | Renders an HTML invoice for `ValidatedQueued` invoices, uploads to Drive, marks `Invoiced` |
+| WF9 | Telegram (manager bot) | Manager Q&A agent over the last 100 invoices (owner chat ID is hardcoded in the IF node) |
+| WF13 | Webhook (`ai-erp-app`) | Everything this app calls: chat, create lead/task/invoice |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Known limitations (by design)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **The vector store is in-memory only** — it's wiped on every n8n restart (including redeploys of the Docker container). Re-run **WF6 then WF7** manually (Execute workflow) after any restart, or the chat agents' product/policy search returns empty results.
+- No PDF conversion — invoices are saved as HTML to Drive; convert manually via Google Docs → Download → PDF if a real PDF is needed.
+- Airtable triggers poll at minimum 1-minute resolution; two invoices created in the same minute can race on invoice numbering.
+- No retries/error handling in the workflows — a red execution in n8n's Executions tab is expected behavior on failure, not a bug to silently swallow.
+- Single-user app, no auth, no cache — Airtable's API rate limit (~5 req/s) is the practical ceiling for a heavier dashboard.
+
+## Status
+
+Last verified end-to-end 2026-09-17 after migrating n8n from n8n Cloud to a self-hosted Docker instance: webhook URL updated, WF3 and WF4a field-reference bugs fixed, vector store repopulated. See the project checklist artifact for the full build log.

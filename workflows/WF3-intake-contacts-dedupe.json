@@ -2,6 +2,14 @@
   "name": "WF3 - קליטת אנשי קשר וסינון כפילויות",
   "nodes": [
     {
+      "id": "3797bb16-a8ce-40df-b3bb-98b43726433d",
+      "name": "טריגר ליד חדש",
+      "type": "n8n-nodes-base.airtableTrigger",
+      "typeVersion": 1,
+      "position": [
+        -912,
+        96
+      ],
       "parameters": {
         "pollTimes": {
           "item": [
@@ -24,11 +32,6 @@
         "triggerField": "Created",
         "additionalFields": {}
       },
-      "id": "3797bb16-a8ce-40df-b3bb-98b43726433d",
-      "name": "טריגר ליד חדש",
-      "type": "n8n-nodes-base.airtableTrigger",
-      "typeVersion": 1,
-      "position": [-912, 96],
       "credentials": {
         "airtableTokenApi": {
           "id": "QbC6k0gPl10eEHOV",
@@ -37,6 +40,14 @@
       }
     },
     {
+      "id": "58c1ead6-c7ea-4dd7-b1fe-b0f7244e5435",
+      "name": "חיפוש כפילויות לפי אימייל",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -688,
+        96
+      ],
       "parameters": {
         "operation": "search",
         "base": {
@@ -52,11 +63,6 @@
         "filterByFormula": "={{ \"{Email} = \\\"\" + $json.fields.Email + \"\\\"\" }}",
         "options": {}
       },
-      "id": "58c1ead6-c7ea-4dd7-b1fe-b0f7244e5435",
-      "name": "חיפוש כפילויות לפי אימייל",
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.2,
-      "position": [-688, 96],
       "credentials": {
         "airtableTokenApi": {
           "id": "QbC6k0gPl10eEHOV",
@@ -65,6 +71,14 @@
       }
     },
     {
+      "id": "bff02680-b1f3-447d-81c1-61c42158809d",
+      "name": "ספירת התאמות",
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        -464,
+        96
+      ],
       "parameters": {
         "fieldsToSummarize": {
           "values": [
@@ -76,43 +90,50 @@
         "options": {
           "outputFormat": "singleItem"
         }
-      },
-      "id": "bff02680-b1f3-447d-81c1-61c42158809d",
-      "name": "ספירת התאמות",
-      "type": "n8n-nodes-base.summarize",
-      "typeVersion": 1.1,
-      "position": [-464, 96]
+      }
     },
     {
+      "id": "6473470f-7eac-460d-be7a-829e73690f50",
+      "name": "כפילות",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -240,
+        96
+      ],
       "parameters": {
         "conditions": {
           "options": {
-            "caseSensitive": true,
+            "version": 1,
             "leftValue": "",
-            "typeValidation": "strict",
-            "version": 1
+            "caseSensitive": true,
+            "typeValidation": "strict"
           },
           "conditions": [
             {
-              "leftValue": "={{ $json.Email_count }}",
+              "leftValue": "={{ $('חיפוש כפילויות לפי אימייל').all().length }}",
               "operator": {
                 "type": "number",
                 "operation": "gt"
               },
-              "rightValue": 1
+              "rightValue": 0,
+              "id": "condition-1789622102520-ryee5s9rq"
             }
           ],
           "combinator": "and"
         },
         "options": {}
-      },
-      "id": "6473470f-7eac-460d-be7a-829e73690f50",
-      "name": "כפילות",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [-240, 96]
+      }
     },
     {
+      "id": "d85070d0-06d6-4822-bd47-e3950f484dc9",
+      "name": "סימון כפילות",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
       "parameters": {
         "operation": "update",
         "base": {
@@ -151,15 +172,12 @@
               "canBeUsedToMatch": false
             }
           ],
-          "matchingColumns": ["id"]
+          "matchingColumns": [
+            "id"
+          ]
         },
         "options": {}
       },
-      "id": "d85070d0-06d6-4822-bd47-e3950f484dc9",
-      "name": "סימון כפילות",
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.2,
-      "position": [0, 0],
       "credentials": {
         "airtableTokenApi": {
           "id": "QbC6k0gPl10eEHOV",
@@ -168,6 +186,14 @@
       }
     },
     {
+      "id": "2dc99daf-29c9-46f3-b700-c6ae2d61da9e",
+      "name": "סימון ליד חדש",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        192
+      ],
       "parameters": {
         "operation": "update",
         "base": {
@@ -206,15 +232,12 @@
               "canBeUsedToMatch": false
             }
           ],
-          "matchingColumns": ["id"]
+          "matchingColumns": [
+            "id"
+          ]
         },
         "options": {}
       },
-      "id": "2dc99daf-29c9-46f3-b700-c6ae2d61da9e",
-      "name": "סימון ליד חדש",
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.2,
-      "position": [0, 192],
       "credentials": {
         "airtableTokenApi": {
           "id": "QbC6k0gPl10eEHOV",
@@ -225,18 +248,54 @@
   ],
   "connections": {
     "טריגר ליד חדש": {
-      "main": [[{ "node": "חיפוש כפילויות לפי אימייל", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "חיפוש כפילויות לפי אימייל",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "חיפוש כפילויות לפי אימייל": {
-      "main": [[{ "node": "ספירת התאמות", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "ספירת התאמות",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "ספירת התאמות": {
-      "main": [[{ "node": "כפילות", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "כפילות",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "כפילות": {
       "main": [
-        [{ "node": "סימון כפילות", "type": "main", "index": 0 }],
-        [{ "node": "סימון ליד חדש", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "סימון כפילות",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "סימון ליד חדש",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
@@ -245,7 +304,11 @@
     "binaryMode": "separate",
     "availableInMCP": true
   },
-  "staticData": null,
+  "staticData": {
+    "node:טריגר ליד חדש": {
+      "lastTimeChecked": "2026-09-17T05:15:03Z"
+    }
+  },
   "pinData": {},
   "meta": {
     "templateCredsSetupCompleted": true

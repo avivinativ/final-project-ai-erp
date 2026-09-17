@@ -2,6 +2,14 @@
   "name": "WF4a - סוכן מכירות - מיילים קרים",
   "nodes": [
     {
+      "id": "a0f2601c-84a1-48f3-a538-cf704141a932",
+      "name": "כל 3 שעות",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
       "parameters": {
         "rule": {
           "interval": [
@@ -11,14 +19,17 @@
             }
           ]
         }
-      },
-      "id": "a0f2601c-84a1-48f3-a538-cf704141a932",
-      "name": "כל 3 שעות",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.4,
-      "position": [0, 0]
+      }
     },
     {
+      "id": "ff0d9e19-3c6a-4032-a9b8-156e2c62cb3a",
+      "name": "שליפת ליד חדש",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        0
+      ],
       "parameters": {
         "operation": "search",
         "base": {
@@ -36,11 +47,6 @@
         "limit": 1,
         "options": {}
       },
-      "id": "ff0d9e19-3c6a-4032-a9b8-156e2c62cb3a",
-      "name": "שליפת ליד חדש",
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.2,
-      "position": [224, 0],
       "credentials": {
         "airtableTokenApi": {
           "id": "QbC6k0gPl10eEHOV",
@@ -49,21 +55,32 @@
       }
     },
     {
-      "parameters": {
-        "promptType": "define",
-        "text": "={{ \"כתוב מייל מכירה קר וידידותי בעברית ללקוח פוטנציאלי בשם \" + $json.Name + \" מחברת \" + $json.Company + \". הצג את השירותים שלנו וסיים בקריאה לפעולה עדינה לתיאום שיחה.\" }}",
-        "hasOutputParser": true,
-        "options": {
-          "systemMessage": "אתה סוכן מכירות המנסח מיילים קרים ראשוניים בעברית, בטון מקצועי, קצר וידידותי. אל תבטיח דברים שלא נאמרו לך, ואל תכלול מחירים."
-        }
-      },
       "id": "ac41427d-49a7-45d7-8bbc-1a97c2e5dafc",
       "name": "ניסוח מייל קר",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
-      "position": [448, 0]
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ \"כתוב מייל מכירה קר וידידותי בעברית ללקוח פוטנציאלי בשם \" + $json.fields.Name + \" מחברת \" + $json.fields.Company + \". הצג את השירותים שלנו וסיים בקריאה לפעולה עדינה לתיאום שיחה.\" }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "אתה סוכן מכירות המנסח מיילים קרים ראשוניים בעברית, בטון מקצועי, קצר וידידותי. אל תבטיח דברים שלא נאמרו לך, ואל תכלול מחירים."
+        }
+      }
     },
     {
+      "id": "b69e648d-aa58-4a74-bb9e-deb189e7b94f",
+      "name": "מודל OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        448,
+        208
+      ],
       "parameters": {
         "model": {
           "__rl": true,
@@ -73,11 +90,6 @@
         "builtInTools": {},
         "options": {}
       },
-      "id": "b69e648d-aa58-4a74-bb9e-deb189e7b94f",
-      "name": "מודל OpenAI",
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
-      "typeVersion": 1.3,
-      "position": [448, 208],
       "credentials": {
         "openAiApi": {
           "id": "XJFfFM4hQXksnuVj",
@@ -86,18 +98,29 @@
       }
     },
     {
-      "parameters": {
-        "jsonSchemaExample": "{ \"subject\": \"כותרת המייל\", \"body\": \"גוף המייל בעברית, בפורמט HTML פשוט\" }"
-      },
       "id": "750c0bf2-789e-4f08-8953-2ff3ab09f41b",
       "name": "מבנה מייל",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
-      "position": [608, 208]
+      "position": [
+        608,
+        208
+      ],
+      "parameters": {
+        "jsonSchemaExample": "{ \"subject\": \"כותרת המייל\", \"body\": \"גוף המייל בעברית, בפורמט HTML פשוט\" }"
+      }
     },
     {
+      "id": "a51b1450-94d0-4f08-ac42-88531e10899a",
+      "name": "שליחת מייל קר",
+      "webhookId": "f726ba64-a2ef-4ca3-a03e-173d098b4de0",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        720,
+        0
+      ],
       "parameters": {
-        "authentication": "serviceAccount",
         "sendTo": "={{ $('שליפת ליד חדש').item.json.fields.Email }}",
         "subject": "={{ $json.output.subject }}",
         "message": "={{ $json.output.body }}",
@@ -105,20 +128,22 @@
           "appendAttribution": false
         }
       },
-      "id": "a51b1450-94d0-4f08-ac42-88531e10899a",
-      "name": "שליחת מייל קר",
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [720, 0],
-      "webhookId": "f726ba64-a2ef-4ca3-a03e-173d098b4de0",
       "credentials": {
-        "googleApi": {
-          "id": "WgIOpk8xARNzxz3Y",
-          "name": "Google Service Account account"
+        "gmailOAuth2": {
+          "id": "jB6qNjUSWl8mHOUm",
+          "name": "Gmail account"
         }
       }
     },
     {
+      "id": "d2272284-810b-4ed9-8cd0-50db087543af",
+      "name": "סימון כליד שנוצר עמו קשר",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        0
+      ],
       "parameters": {
         "operation": "update",
         "base": {
@@ -157,15 +182,12 @@
               "canBeUsedToMatch": false
             }
           ],
-          "matchingColumns": ["id"]
+          "matchingColumns": [
+            "id"
+          ]
         },
         "options": {}
       },
-      "id": "d2272284-810b-4ed9-8cd0-50db087543af",
-      "name": "סימון כליד שנוצר עמו קשר",
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.2,
-      "position": [880, 0],
       "credentials": {
         "airtableTokenApi": {
           "id": "QbC6k0gPl10eEHOV",
@@ -176,22 +198,70 @@
   ],
   "connections": {
     "כל 3 שעות": {
-      "main": [[{ "node": "שליפת ליד חדש", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "שליפת ליד חדש",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "שליפת ליד חדש": {
-      "main": [[{ "node": "ניסוח מייל קר", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "ניסוח מייל קר",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "ניסוח מייל קר": {
-      "main": [[{ "node": "שליחת מייל קר", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "שליחת מייל קר",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "מודל OpenAI": {
-      "ai_languageModel": [[{ "node": "ניסוח מייל קר", "type": "ai_languageModel", "index": 0 }]]
+      "ai_languageModel": [
+        [
+          {
+            "node": "ניסוח מייל קר",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     },
     "מבנה מייל": {
-      "ai_outputParser": [[{ "node": "ניסוח מייל קר", "type": "ai_outputParser", "index": 0 }]]
+      "ai_outputParser": [
+        [
+          {
+            "node": "ניסוח מייל קר",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
     },
     "שליחת מייל קר": {
-      "main": [[{ "node": "סימון כליד שנוצר עמו קשר", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "סימון כליד שנוצר עמו קשר",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -199,7 +269,16 @@
     "binaryMode": "separate",
     "availableInMCP": true
   },
-  "staticData": null,
+  "staticData": {
+    "node:כל 3 שעות": {
+      "recurrenceRules": [
+        9
+      ],
+      "recurrenceRuleSignatures": [
+        "hours:3"
+      ]
+    }
+  },
   "pinData": {},
   "meta": {
     "templateCredsSetupCompleted": true

@@ -12,7 +12,6 @@
             }
           ]
         },
-        "authentication": "serviceAccount",
         "filters": {
           "readStatus": "unread"
         }
@@ -21,11 +20,14 @@
       "name": "בדיקת תשובות",
       "type": "n8n-nodes-base.gmailTrigger",
       "typeVersion": 1.4,
-      "position": [-1264, 240],
+      "position": [
+        -1264,
+        240
+      ],
       "credentials": {
-        "googleApi": {
-          "id": "WgIOpk8xARNzxz3Y",
-          "name": "Google Service Account account"
+        "gmailOAuth2": {
+          "id": "jB6qNjUSWl8mHOUm",
+          "name": "Gmail account"
         }
       }
     },
@@ -48,7 +50,10 @@
       "name": "חילוץ אימייל שולח",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
-      "position": [-1040, 240]
+      "position": [
+        -1040,
+        240
+      ]
     },
     {
       "parameters": {
@@ -72,7 +77,10 @@
       "name": "חיפוש ליד לפי אימייל",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.2,
-      "position": [-816, 240],
+      "position": [
+        -816,
+        240
+      ],
       "alwaysOutputData": true,
       "credentials": {
         "airtableTokenApi": {
@@ -94,7 +102,10 @@
       "name": "סיווג תשובה",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
-      "position": [-512, 240]
+      "position": [
+        -512,
+        240
+      ]
     },
     {
       "parameters": {
@@ -112,7 +123,10 @@
       "name": "מודל סיווג",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
-      "position": [-512, 448],
+      "position": [
+        -512,
+        448
+      ],
       "credentials": {
         "openAiApi": {
           "id": "XJFfFM4hQXksnuVj",
@@ -128,7 +142,10 @@
       "name": "מבנה סיווג",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
-      "position": [-336, 448]
+      "position": [
+        -336,
+        448
+      ]
     },
     {
       "parameters": {
@@ -211,7 +228,10 @@
       "name": "ניתוב לפי קטגוריה",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
-      "position": [-224, 208]
+      "position": [
+        -224,
+        208
+      ]
     },
     {
       "parameters": {
@@ -252,7 +272,9 @@
               "canBeUsedToMatch": false
             }
           ],
-          "matchingColumns": ["id"]
+          "matchingColumns": [
+            "id"
+          ]
         },
         "options": {}
       },
@@ -260,7 +282,10 @@
       "name": "סימון מעוניין",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.2,
-      "position": [0, 0],
+      "position": [
+        0,
+        0
+      ],
       "credentials": {
         "airtableTokenApi": {
           "id": "QbC6k0gPl10eEHOV",
@@ -307,7 +332,9 @@
               "canBeUsedToMatch": false
             }
           ],
-          "matchingColumns": ["id"]
+          "matchingColumns": [
+            "id"
+          ]
         },
         "options": {}
       },
@@ -315,7 +342,10 @@
       "name": "סימון לא מעוניין",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.2,
-      "position": [0, 160],
+      "position": [
+        0,
+        160
+      ],
       "credentials": {
         "airtableTokenApi": {
           "id": "QbC6k0gPl10eEHOV",
@@ -362,7 +392,9 @@
               "canBeUsedToMatch": false
             }
           ],
-          "matchingColumns": ["id"]
+          "matchingColumns": [
+            "id"
+          ]
         },
         "options": {}
       },
@@ -370,7 +402,10 @@
       "name": "סימון שאלה פתוחה",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.2,
-      "position": [0, 320],
+      "position": [
+        0,
+        320
+      ],
       "credentials": {
         "airtableTokenApi": {
           "id": "QbC6k0gPl10eEHOV",
@@ -417,7 +452,9 @@
               "canBeUsedToMatch": false
             }
           ],
-          "matchingColumns": ["id"]
+          "matchingColumns": [
+            "id"
+          ]
         },
         "options": {}
       },
@@ -425,7 +462,10 @@
       "name": "סימון לבדיקה ידנית",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.2,
-      "position": [0, 480],
+      "position": [
+        0,
+        480
+      ],
       "credentials": {
         "airtableTokenApi": {
           "id": "QbC6k0gPl10eEHOV",
@@ -462,38 +502,121 @@
       "name": "ליד נמצא?",
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.3,
-      "position": [-672, 240]
+      "position": [
+        -672,
+        240
+      ]
     }
   ],
   "connections": {
     "בדיקת תשובות": {
-      "main": [[{ "node": "חילוץ אימייל שולח", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "חילוץ אימייל שולח",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "חילוץ אימייל שולח": {
-      "main": [[{ "node": "חיפוש ליד לפי אימייל", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "חיפוש ליד לפי אימייל",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "סיווג תשובה": {
-      "main": [[{ "node": "ניתוב לפי קטגוריה", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "ניתוב לפי קטגוריה",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "מודל סיווג": {
-      "ai_languageModel": [[{ "node": "סיווג תשובה", "type": "ai_languageModel", "index": 0 }]]
+      "ai_languageModel": [
+        [
+          {
+            "node": "סיווג תשובה",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     },
     "מבנה סיווג": {
-      "ai_outputParser": [[{ "node": "סיווג תשובה", "type": "ai_outputParser", "index": 0 }]]
+      "ai_outputParser": [
+        [
+          {
+            "node": "סיווג תשובה",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
     },
     "ניתוב לפי קטגוריה": {
       "main": [
-        [{ "node": "סימון מעוניין", "type": "main", "index": 0 }],
-        [{ "node": "סימון לא מעוניין", "type": "main", "index": 0 }],
-        [{ "node": "סימון שאלה פתוחה", "type": "main", "index": 0 }],
-        [{ "node": "סימון לבדיקה ידנית", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "סימון מעוניין",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "סימון לא מעוניין",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "סימון שאלה פתוחה",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "סימון לבדיקה ידנית",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "חיפוש ליד לפי אימייל": {
-      "main": [[{ "node": "ליד נמצא?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "ליד נמצא?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "ליד נמצא?": {
-      "main": [[{ "node": "סיווג תשובה", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "סיווג תשובה",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -501,7 +624,20 @@
     "binaryMode": "separate",
     "availableInMCP": true
   },
-  "staticData": null,
+  "staticData": {
+    "node:בדיקת תשובות": {
+      "בדיקת תשובות": {
+        "lastTimeChecked": 1789622120,
+        "pendingMessageIds": [],
+        "noProgressTicks": 0,
+        "possibleDuplicates": [
+          "1a0adca7ce8583d7",
+          "1a0adc4a9f60a418",
+          "1a0adc3f84b737e9"
+        ]
+      }
+    }
+  },
   "pinData": {},
   "meta": {
     "templateCredsSetupCompleted": true
