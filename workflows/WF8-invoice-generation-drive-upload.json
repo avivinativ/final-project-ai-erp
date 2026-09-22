@@ -183,6 +183,18 @@
           "name": "Airtable Personal Access Token account"
         }
       }
+    },
+    {
+      "id": "note-wf8",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [0, -220],
+      "parameters": {
+        "width": 900,
+        "height": 180,
+        "content": "## WF8 - הפקת חשבונית והעלאה לדרייב\nטריגר: Schedule כל דקה.\n1) שולף עד 5 חשבוניות בסטטוס ValidatedQueued (מוזנות ע\"י WF1).\n2) בונה מסמך HTML בעברית (RTL) עם פרטי הלקוח, סכום, מע\"מ וסה\"כ.\n3) מעלה כקובץ לגוגל דרייב.\n4) מעדכן PdfUrl ו-Status=Invoiced בחשבונית.\nהערה: המסמך הוא HTML, לא PDF אמיתי - המרה ידנית דרך Google Docs במידת הצורך."
+      }
     }
   ],
   "connections": {
@@ -234,7 +246,8 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "errorWorkflow": "K6l2pJUO5j0bGkeb"
   },
   "staticData": {
     "node:כל דקה": {

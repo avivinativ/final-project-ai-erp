@@ -57,7 +57,43 @@ All 10 live on the self-hosted n8n instance (`n8n.nativ-ai.co.il`). Numbering is
 
 ## Status
 
-Last verified end-to-end 2026-09-22: full chain re-tested live (not just read from code) —
+**2026-09-22 (later same day) — submission hardening pass:**
+- **Activated the workflows that were silently inactive** — WF1, WF3, WF4b, WF5, WF8, WF9, WF13
+  were all `active: false` on the live instance despite the earlier note below claiming they'd
+  been turned on; the production webhook (`WF13`) was therefore not actually responding. All
+  seven are active now (WF4a stays off by design). WF6/WF7 have no trigger (manual-only), so
+  activation doesn't apply to them.
+- **Added WF0 (error handler)** and wired it as the Error Workflow on all 10 other workflows —
+  any node failure anywhere now sends a Telegram alert to the owner with the workflow, node,
+  error message and execution link.
+- **Added a Hebrew sticky note to every workflow** describing its trigger and logic — the n8n
+  canvas is now self-documenting, matching what a grader would expect to see.
+- **Seeded real demo data** in Airtable: 10 more products (13 total, was 3), 6 leads (including
+  one deliberate duplicate email to exercise WF3's dedup path), 2 invoices (to exercise WF1→WF8
+  live), and 3 tasks. Leads/Invoices tables were completely empty before this.
+- Re-exported all 11 workflows from the live instance into `workflows/` so the repo matches
+  production exactly, and added `docs/`, `policies/`, `data/`, `scripts/smoke-test.mjs`.
+- Ran `node scripts/smoke-test.mjs`: Airtable reachable, and the WF13 webhook's `chat` action
+  returned a real RAG-backed answer end-to-end.
+- **Found and fixed a real WF3 bug while live-testing with seeded data**: the dedup-counting
+  node was a Summarize node with `outputFormat: singleItem`, which collapses every item in an
+  Airtable-trigger poll batch into one summary row. With exactly one new lead per poll (the only
+  case anyone had tested) this happened to work; with 2+ leads landing in the same polling minute
+  it failed with `pairedItemMultipleMatches` and left every lead in that batch with no Status.
+  Reproduced live with 5 simultaneous leads, replaced the Summarize node with a Code node that
+  counts matches per originating item via `pairedItem`, redeployed to the live workflow, and
+  re-seeded the same 5 leads — all correctly marked `New`, and a 6th duplicate-email lead
+  correctly marked `Duplicate`.
+- **Found WF8's Google Drive credential has expired** (OAuth needs reconnecting) — it was
+  erroring on every 1-minute run since the workflow was activated, and WF0 correctly fired a
+  Telegram alert each time (~13 alerts landed on the manager bot — expected proof the error
+  handler works, but worth clearing before a demo). **Deactivated WF8** to stop the error loop
+  until the credential is reconnected by hand in the n8n UI (OAuth requires interactive login,
+  which this session can't do) — see the root [README's known-limitations section](../README.md).
+  The 2 seeded invoices are sitting in `ValidatedQueued`, ready to be picked up the moment WF8
+  is reactivated.
+
+Last verified end-to-end 2026-09-22 (earlier pass): full chain re-tested live (not just read from code) —
 - **n8n**: found and fixed two real bugs — WF3's duplicate-check counted the new lead against itself, so every lead (including the first ever) was wrongly marked `Duplicate` and never reached the sales pipeline (now requires >1 match); WF8's Google Drive upload node had an empty `folderId`, causing every invoice upload to 404 (now points at Drive root). Activated WF1, WF3, WF4b, WF5, WF8, WF9, WF13 (WF4a intentionally left off — it emails real leads on a schedule, pending a decision to enable it; WF6/WF7 correctly stay manual-only).
 - **RAG**: confirmed live via a real chat query — the policy and product vector stores are both populated and answering correctly right now. Still re-run WF6 then WF7 manually right before any demo, since a restart wipes them silently.
 - **App**: fixed two local setup bugs — `.env.local` was sitting one directory up from where Next.js actually reads it (`app/.env.local` was missing entirely), and `app/node_modules` didn't exist (only the wrong directory had one, from an earlier incomplete restructure). Both fixed; `npm install` now works from `app/` as documented above.

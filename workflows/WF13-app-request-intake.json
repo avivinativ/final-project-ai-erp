@@ -483,6 +483,18 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [64, 752]
+    },
+    {
+      "id": "note-wf13",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-416, -220],
+      "parameters": {
+        "width": 1100,
+        "height": 180,
+        "content": "## WF13 - קליטת קריאות מהאפליקציה\nטריגר: Webhook POST /webhook/ai-erp-app - נקודת הכניסה היחידה של דשבורד הניהול (Next.js) לכתיבה ולצ'אט.\nמנתב לפי שדה body.action:\n- chat: סוכן AI עם RAG (מדיניות + מוצרים), זיכרון לפי sessionId.\n- createLead / createTask / createInvoice: כותב רשומה ב-Airtable, מחזיר {ok, id}.\n- פעולה לא מוכרת → תשובת שגיאה 400."
+      }
     }
   ],
   "connections": {
@@ -532,7 +544,8 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "errorWorkflow": "K6l2pJUO5j0bGkeb"
   },
   "staticData": null,
   "pinData": {},

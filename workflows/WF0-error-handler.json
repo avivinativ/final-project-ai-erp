@@ -1,0 +1,76 @@
+{
+  "name": "WF0 - טיפול בשגיאות (Error Handler)",
+  "nodes": [
+    {
+      "id": "err-trigger-1",
+      "name": "טריגר שגיאה",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [0, 0],
+      "parameters": {}
+    },
+    {
+      "id": "err-note-1",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-40, -180],
+      "parameters": {
+        "width": 380,
+        "height": 140,
+        "content": "## WF0 - מטפל שגיאות מרכזי\nמוגדר כ-Error Workflow על כל שאר ה-workflows של הפרויקט. כל כשל בכל workflow אחר מפעיל את הזרימה כאן ושולח התראה בטלגרם לבעל העסק, כולל שם ה-workflow, שם ה-node שנכשל, הודעת השגיאה וקישור להרצה בפועל."
+      }
+    },
+    {
+      "id": "err-format-1",
+      "name": "עיצוב הודעת שגיאה",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [224, 0],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "alert-text",
+              "name": "alertText",
+              "type": "string",
+              "value": "={{ \"⚠️ שגיאה במערכת ה-ERP\\n\\nWorkflow: \" + ($json.workflow && $json.workflow.name || \"לא ידוע\") + \"\\nNode: \" + ($json.execution && $json.execution.error && $json.execution.error.node && $json.execution.error.node.name || \"לא ידוע\") + \"\\nהודעה: \" + ($json.execution && $json.execution.error && $json.execution.error.message || \"אין פרטים\") + \"\\nקישור להרצה: \" + ($json.execution && $json.execution.url || \"\") }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "err-telegram-1",
+      "name": "התראה למנהל",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [448, 0],
+      "parameters": {
+        "chatId": "5643627322",
+        "text": "={{ $json.alertText }}",
+        "additionalFields": { "appendAttribution": false }
+      },
+      "credentials": {
+        "telegramApi": { "id": "RVrYZVkmQ9HqDamx", "name": "בוט מנהל" }
+      }
+    }
+  ],
+  "connections": {
+    "טריגר שגיאה": { "main": [[{ "node": "עיצוב הודעת שגיאה", "type": "main", "index": 0 }]] },
+    "עיצוב הודעת שגיאה": { "main": [[{ "node": "התראה למנהל", "type": "main", "index": 0 }]] }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  },
+  "staticData": null,
+  "pinData": null,
+  "meta": null,
+  "tags": []
+}

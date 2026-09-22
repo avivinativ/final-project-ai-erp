@@ -159,6 +159,18 @@
           "name": "בוט מנהל"
         }
       }
+    },
+    {
+      "id": "note-wf9",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-464, -220],
+      "parameters": {
+        "width": 1150,
+        "height": 180,
+        "content": "## WF9 - סוכן המנהל\nטריגר: הודעת Telegram מבוט המנהל.\n1) בודק שה-chat id תואם את בעל העסק בלבד (קבוע מראש) - פונה אחר מקבל סירוב שקט (אין המשך זרימה).\n2) שולף עד 100 חשבוניות אחרונות מ-Airtable ומאחד אותן לפריט JSON יחיד.\n3) סוכן AI עונה בעברית על שאלות לגבי הכנסות/סטטוסים על סמך הנתונים בלבד - קריאה בלבד, ללא כלים נוספים וללא יכולת לבצע פעולות."
+      }
     }
   ],
   "connections": {
@@ -187,7 +199,8 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "errorWorkflow": "K6l2pJUO5j0bGkeb"
   },
   "staticData": null,
   "pinData": {},

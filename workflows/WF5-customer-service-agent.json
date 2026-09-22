@@ -153,6 +153,18 @@
           "name": "בוט לקוחות"
         }
       }
+    },
+    {
+      "id": "note-wf5",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [0, -220],
+      "parameters": {
+        "width": 750,
+        "height": 180,
+        "content": "## WF5 - סוכן שירות לקוחות\nטריגר: הודעת Telegram מבוט הלקוחות.\nסוכן AI עם זיכרון שיחה לפי chat id (10 הודעות אחרונות) ושני כלי RAG:\n- SearchPolicies: מדיניות משלוחים/החזרות/אחריות/תשלומים.\n- SearchProducts: קטלוג מוצרים ומחירים.\nהוראת מערכת: לענות רק ממה שהכלים מחזירים, לא להמציא מידע. תשובה נשלחת חזרה בטלגרם."
+      }
     }
   ],
   "connections": {
@@ -184,7 +196,8 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "errorWorkflow": "K6l2pJUO5j0bGkeb"
   },
   "staticData": null,
   "pinData": {},

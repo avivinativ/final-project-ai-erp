@@ -1,29 +1,74 @@
 # פרויקט גמר - AI ERP (No-Code)
 
-פרויקט גמר בקורס John Bryce: מערכת ERP קטנה מבוססת AI לעסק אלקטרוניקה פיקטיבי, בנויה על Airtable (נתונים) + n8n (אוטומציות וסוכני AI) + Next.js (דשבורד ניהול).
+פרויקט גמר בקורס John Bryce: מערכת ERP קטנה מבוססת AI לעסק אלקטרוניקה פיקטיבי, בנויה על
+**Airtable** (נתונים) + **n8n** self-hosted (10 אוטומציות + WF0 מטפל שגיאות + 3 סוכני AI +
+מאגר וקטורי RAG) + **Next.js** (דשבורד ניהול אמיתי, לא no-code).
+
+```
+ דשבורד (Next.js) ──POST /webhook/ai-erp-app──▶ WF13 ──▶ ניתוב לפי action
+                                                              │
+                 ┌────────────────────────────────────────────┼─────────────────────┐
+                 ▼                                             ▼                     ▼
+          action=chat (RAG)                         createLead/createTask     createInvoice
+                                                              │                       │
+                                                              ▼                       ▼
+                                                    WF3 → WF4a → WF4b            WF1 → WF8
+
+ לקוח ──Telegram──▶ WF5 (RAG)      מנהל ──Telegram──▶ WF9      כל כשל ──▶ WF0 ──▶ התראת Telegram
+```
+
+פירוט מלא: [docs/architecture.md](docs/architecture.md).
 
 ## מבנה הריפו
 
-- `workflows/` - 10 אוטומציות n8n (ייצוא מדויק מתיקיית "פרוייקט גמר" ב-n8n), ניתנות לייבוא ישיר ל-n8n (Import from File / Import from URL).
-- `app/` - דשבורד הניהול (Next.js), כולל צאט AI, ניהול לידים, משימות וחשבוניות.
+- `workflows/` - 11 אוטומציות n8n (WF0 מטפל שגיאות + 10 workflows), ייצוא מדויק מהמופע החי
+  (`n8n.nativ-ai.co.il`), כולל sticky notes בעברית על כל workflow וחיבור ל-Error Workflow.
+- `app/` - דשבורד הניהול (Next.js אמיתי, לא no-code), כולל צ'אט AI, ניהול לידים, משימות וחשבוניות.
+- `docs/` - ארכיטקטורה, סכימת Airtable, תסריט דמו, שאלות צפויות, בריף הקורס המקורי.
+- `policies/`, `data/` - תיעוד מקור התוכן שמוזן למאגר הווקטורי (RAG) של WF6/WF7.
+- `scripts/smoke-test.mjs` - בדיקת בריאות קצה-לקצה (Airtable + webhook n8n).
 
 ## האוטומציות (workflows/)
 
-| קובץ | תיאור |
-|---|---|
-| WF1-verify-tax-documents.json | אימות מסמכי מס והכנסתם לתור הפקה (חישוב מע"מ וסה"כ) |
-| WF3-intake-contacts-dedupe.json | קליטת אנשי קשר וסינון כפילויות לפי אימייל |
-| WF4a-sales-cold-emails.json | סוכן מכירות - ניסוח ושליחת מיילים קרים ללידים חדשים |
-| WF4b-sales-reply-triage.json | סוכן מכירות - סיווג תשובות לידים (מעוניין/לא מעוניין/שאלה) |
-| WF5-customer-service-agent.json | סוכן שירות לקוחות בטלגרם, עם חיפוש במדיניות ובמוצרים (RAG) |
-| WF6-policies-to-vector-store.json | טעינת מדיניות החברה למאגר וקטורי |
-| WF7-products-to-vector-store.json | טעינת קטלוג המוצרים ממ-Airtable למאגר וקטורי |
-| WF8-invoice-generation-drive-upload.json | הפקת מסמך חשבונית והעלאה ל-Google Drive |
-| WF9-admin-agent.json | סוכן AI למנהל העסק בטלגרם - שאלות על חשבוניות והכנסות |
-| WF13-app-request-intake.json | Webhook שמקבל בקשות מהדשבורד (צ'אט, יצירת ליד/משימה/חשבונית) |
+| קובץ | תיאור | טריגר |
+|---|---|---|
+| WF0-error-handler.json | מטפל שגיאות מרכזי - התראת Telegram למנהל בכל כשל בכל workflow אחר | Error Trigger |
+| WF1-verify-tax-documents.json | חישוב מע"מ, סה"כ ומספר חשבונית; מסמן ValidatedQueued | Airtable polling (כל דקה) |
+| WF3-intake-contacts-dedupe.json | קליטת לידים וסינון כפילויות לפי אימייל | Airtable polling (כל דקה) |
+| WF4a-sales-cold-emails.json | סוכן AI מנסח ושולח מייל קר ללידים חדשים (**כבוי כברירת מחדל**) | Schedule (כל 3 שעות) |
+| WF4b-sales-reply-triage.json | סוכן AI מסווג תשובות לידים (מעוניין/לא מעוניין/שאלה) | Gmail polling (כל 30 דק') |
+| WF5-customer-service-agent.json | סוכן שירות לקוחות בטלגרם, RAG על מדיניות ומוצרים | Telegram |
+| WF6-policies-to-vector-store.json | טעינת מדיניות החברה למאגר וקטורי (RAG) | הפעלה ידנית |
+| WF7-products-to-vector-store.json | טעינת קטלוג המוצרים מ-Airtable למאגר וקטורי (RAG) | הפעלה ידנית |
+| WF8-invoice-generation-drive-upload.json | הפקת מסמך חשבונית (HTML) והעלאה ל-Google Drive | Schedule (כל דקה) |
+| WF9-admin-agent.json | סוכן AI למנהל העסק בטלגרם - שאלות על חשבוניות והכנסות | Telegram |
+| WF13-app-request-intake.json | Webhook יחיד שמקבל את כל בקשות הדשבורד (צ'אט, יצירת ליד/משימה/חשבונית) | Webhook |
 
-כל הקבצים מכילים את ה-`nodeId`-ים, ה-`credentials` references (שמות בלבד, לא ערכים) וה-expressions המקוריים של n8n. כדי לייבא: n8n → Workflows → Import from File, ולחבר מחדש את ה-credentials המתאימים (Airtable PAT, OpenAI, Google Service Account, Telegram bots).
+כל node בכל workflow מתועד ב-sticky note בעברית — הקנבס מסביר את עצמו. הקבצים מכילים את
+ה-`nodeId`-ים, `credentials` references (שמות בלבד, לא ערכים/סודות) וה-expressions המקוריים.
+כדי לייבא: n8n → Workflows → Import from File, ולחבר מחדש את הקרדנציאלים המתאימים
+(Airtable PAT, OpenAI, Google Drive/Gmail OAuth, שני בוטי Telegram) — ואת WF0 כ-Error Workflow
+בהגדרות של כל workflow אחר.
 
 ## דשבורד (app/)
 
-Next.js app עם Airtable כמקור נתונים ו-n8n webhook לצ'אט/יצירת רשומות. ראו `app/README.md` להרצה מקומית. יש להעתיק `.env.local.example` ל-`.env.local` ולמלא `AIRTABLE_PAT` ו-`N8N_WEBHOOK_URL` בפועל (לא נכללים בריפו).
+Next.js app אמיתי (לא no-code) עם קריאה ישירה מ-Airtable REST API לתצוגה, וכתיבה/צ'אט אך ורק
+דרך ה-webhook היחיד של WF13 (ה-PAT של Airtable לא נחשף לדפדפן). ראו `app/README.md` להרצה מקומית.
+יש להעתיק `.env.local.example` ל-`.env.local` ולמלא `AIRTABLE_PAT` ו-`N8N_WEBHOOK_URL` בפועל
+(לא נכללים בריפו).
+
+## מגבלות ידועות (בכוונה, לשם פשטות)
+
+- **המאגר הווקטורי (RAG) חי בזיכרון של n8n בלבד** - מתאפס בכל restart. יש להריץ ידנית WF6 ואז
+  WF7 (Execute workflow) לפני כל דמו/שימוש.
+- מספר חשבונית מבוסס timestamp (`INV-YYYYMMDDHHmm`), לא מונה רץ - שתי חשבוניות באותה דקה בדיוק
+  עלולות להתנגש; הבחירה נעשתה כדי להימנע מתלות במונה חיצוני.
+- המסמך המופק הוא HTML, לא PDF אמיתי - המרה ידנית דרך Google Docs במידת הצורך.
+- WF4a (מיילים קרים) כבוי בכוונה כברירת מחדל - שולח מיילים אמיתיים ללידים אמיתיים על בסיס Schedule.
+- סוכן המנהל (WF9) קורא בלבד, ללא כלים נוספים, ורואה עד 100 חשבוניות אחרונות.
+- האפליקציה חד-משתמשת, ללא הרשאות/אימות משתמשים.
+- **פעולה נדרשת מהמשתמש לפני הגשה/דמו:** קרדנציאל ה-Google Drive ב-n8n פג תוקף (OAuth) - WF8
+  כרגע **כבוי** כדי לא להציף בהתראות שגיאה (WF0 שלח כ-13 התראות Telegram כשהיה פעיל). יש לפתוח
+  את n8n → Credentials → "Google Drive account" → להתחבר מחדש, ואז להפעיל את WF8 שוב.
+
+פירוט מלא, תסריט דמו ושאלות צפויות: [docs/](docs/).

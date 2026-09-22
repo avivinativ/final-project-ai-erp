@@ -83,6 +83,18 @@
       "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
       "typeVersion": 1,
       "position": [784, 304]
+    },
+    {
+      "id": "note-wf6",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [0, -200],
+      "parameters": {
+        "width": 800,
+        "height": 160,
+        "content": "## WF6 - מדיניות ← מאגר וקטורי\nהפעלה ידנית בלבד (אין טריגר אוטומטי).\nטוען את טקסט מדיניות החברה (מוטמע ישירות ב-node \"עריכת שדות\"), מפצל לקטעים ומטמיע (OpenAI embeddings) למאגר וקטורי בזיכרון תחת מפתח \"policies\".\n⚠️ המאגר חי בזיכרון של n8n בלבד - מתאפס בכל הפעלה מחדש של השרת. יש להריץ ידנית לפני כל דמו."
+      }
     }
   ],
   "connections": {
@@ -105,7 +117,8 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "errorWorkflow": "K6l2pJUO5j0bGkeb"
   },
   "staticData": null,
   "pinData": {},

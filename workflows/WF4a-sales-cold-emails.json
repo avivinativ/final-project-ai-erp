@@ -194,6 +194,18 @@
           "name": "Airtable Personal Access Token account"
         }
       }
+    },
+    {
+      "id": "note-wf4a",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [0, -220],
+      "parameters": {
+        "width": 900,
+        "height": 180,
+        "content": "## WF4a - סוכן מכירות: מיילים קרים\nטריגר: Schedule כל 3 שעות.\n1) שולף ליד יחיד בסטטוס New בלבד (אחד לכל הרצה - כדי שטעות לעולם לא תשלח מייל המוני).\n2) סוכן AI (GPT) מנסח מייל מכירה קר, ידידותי, בעברית - ללא הבטחות מחיר.\n3) שולח ב-Gmail, מסמן Status=Contacted.\n⚠️ מושבת בכוונה כברירת מחדל - שולח מיילים אמיתיים ללידים אמיתיים, יש להפעיל רק באישור מודע."
+      }
     }
   ],
   "connections": {
@@ -267,7 +279,8 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "errorWorkflow": "K6l2pJUO5j0bGkeb"
   },
   "staticData": {
     "node:כל 3 שעות": {

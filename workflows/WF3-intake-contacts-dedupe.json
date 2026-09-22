@@ -6,37 +6,17 @@
       "name": "טריגר ליד חדש",
       "type": "n8n-nodes-base.airtableTrigger",
       "typeVersion": 1,
-      "position": [
-        -912,
-        96
-      ],
+      "position": [-912, 96],
       "parameters": {
-        "pollTimes": {
-          "item": [
-            {
-              "mode": "everyMinute"
-            }
-          ]
-        },
+        "pollTimes": { "item": [{ "mode": "everyMinute" }] },
         "authentication": "airtableTokenApi",
-        "baseId": {
-          "__rl": true,
-          "mode": "id",
-          "value": "app8cwZVO7nUF6ErS"
-        },
-        "tableId": {
-          "__rl": true,
-          "mode": "id",
-          "value": "tbl5JEP9PGG8aYuHx"
-        },
+        "baseId": { "__rl": true, "mode": "id", "value": "app8cwZVO7nUF6ErS" },
+        "tableId": { "__rl": true, "mode": "id", "value": "tbl5JEP9PGG8aYuHx" },
         "triggerField": "Created",
         "additionalFields": {}
       },
       "credentials": {
-        "airtableTokenApi": {
-          "id": "QbC6k0gPl10eEHOV",
-          "name": "Airtable Personal Access Token account"
-        }
+        "airtableTokenApi": { "id": "QbC6k0gPl10eEHOV", "name": "Airtable Personal Access Token account" }
       }
     },
     {
@@ -44,52 +24,27 @@
       "name": "חיפוש כפילויות לפי אימייל",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.2,
-      "position": [
-        -688,
-        96
-      ],
+      "position": [-688, 96],
       "parameters": {
         "operation": "search",
-        "base": {
-          "__rl": true,
-          "mode": "id",
-          "value": "app8cwZVO7nUF6ErS"
-        },
-        "table": {
-          "__rl": true,
-          "mode": "id",
-          "value": "tbl5JEP9PGG8aYuHx"
-        },
+        "base": { "__rl": true, "mode": "id", "value": "app8cwZVO7nUF6ErS" },
+        "table": { "__rl": true, "mode": "id", "value": "tbl5JEP9PGG8aYuHx" },
         "filterByFormula": "={{ \"{Email} = \\\"\" + $json.fields.Email + \"\\\"\" }}",
         "options": {}
       },
       "credentials": {
-        "airtableTokenApi": {
-          "id": "QbC6k0gPl10eEHOV",
-          "name": "Airtable Personal Access Token account"
-        }
+        "airtableTokenApi": { "id": "QbC6k0gPl10eEHOV", "name": "Airtable Personal Access Token account" }
       }
     },
     {
       "id": "bff02680-b1f3-447d-81c1-61c42158809d",
-      "name": "ספירת התאמות",
-      "type": "n8n-nodes-base.summarize",
-      "typeVersion": 1.1,
-      "position": [
-        -464,
-        96
-      ],
+      "name": "בדיקת כפילות לכל ליד",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-464, 96],
       "parameters": {
-        "fieldsToSummarize": {
-          "values": [
-            {
-              "field": "fields.Email"
-            }
-          ]
-        },
-        "options": {
-          "outputFormat": "singleItem"
-        }
+        "mode": "runOnceForAllItems",
+        "jsCode": "const searchResults = $input.all().map(i => i.json);\nconst triggerItems = $('טריגר ליד חדש').all();\nreturn triggerItems.map((t) => {\n  const email = t.json.fields.Email;\n  const matchCount = searchResults.filter(r => r.fields && r.fields.Email === email).length;\n  return { json: { id: t.json.id, email, matchCount, isDuplicate: matchCount > 1 } };\n});\n"
       }
     },
     {
@@ -97,26 +52,15 @@
       "name": "כפילות",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
-      "position": [
-        -240,
-        96
-      ],
+      "position": [-240, 96],
       "parameters": {
         "conditions": {
-          "options": {
-            "version": 1,
-            "leftValue": "",
-            "caseSensitive": true,
-            "typeValidation": "strict"
-          },
+          "options": { "version": 1, "leftValue": "", "caseSensitive": true, "typeValidation": "strict" },
           "conditions": [
             {
-              "leftValue": "={{ $('חיפוש כפילויות לפי אימייל').all().length }}",
-              "operator": {
-                "type": "number",
-                "operation": "gt"
-              },
-              "rightValue": 1,
+              "leftValue": "={{ $json.isDuplicate }}",
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true },
+              "rightValue": "",
               "id": "condition-1789622102520-ryee5s9rq"
             }
           ],
@@ -130,59 +74,24 @@
       "name": "סימון כפילות",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.2,
-      "position": [
-        0,
-        0
-      ],
+      "position": [0, 0],
       "parameters": {
         "operation": "update",
-        "base": {
-          "__rl": true,
-          "mode": "id",
-          "value": "app8cwZVO7nUF6ErS"
-        },
-        "table": {
-          "__rl": true,
-          "mode": "id",
-          "value": "tbl5JEP9PGG8aYuHx"
-        },
+        "base": { "__rl": true, "mode": "id", "value": "app8cwZVO7nUF6ErS" },
+        "table": { "__rl": true, "mode": "id", "value": "tbl5JEP9PGG8aYuHx" },
         "columns": {
           "mappingMode": "defineBelow",
-          "value": {
-            "id": "={{ $('טריגר ליד חדש').item.json.id }}",
-            "Status": "Duplicate"
-          },
+          "value": { "id": "={{ $json.id }}", "Status": "Duplicate" },
           "schema": [
-            {
-              "id": "id",
-              "displayName": "id",
-              "required": false,
-              "defaultMatch": true,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Status",
-              "displayName": "Status",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": false
-            }
+            { "id": "id", "displayName": "id", "required": false, "defaultMatch": true, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Status", "displayName": "Status", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false }
           ],
-          "matchingColumns": [
-            "id"
-          ]
+          "matchingColumns": ["id"]
         },
         "options": {}
       },
       "credentials": {
-        "airtableTokenApi": {
-          "id": "QbC6k0gPl10eEHOV",
-          "name": "Airtable Personal Access Token account"
-        }
+        "airtableTokenApi": { "id": "QbC6k0gPl10eEHOV", "name": "Airtable Personal Access Token account" }
       }
     },
     {
@@ -190,125 +99,63 @@
       "name": "סימון ליד חדש",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.2,
-      "position": [
-        0,
-        192
-      ],
+      "position": [0, 192],
       "parameters": {
         "operation": "update",
-        "base": {
-          "__rl": true,
-          "mode": "id",
-          "value": "app8cwZVO7nUF6ErS"
-        },
-        "table": {
-          "__rl": true,
-          "mode": "id",
-          "value": "tbl5JEP9PGG8aYuHx"
-        },
+        "base": { "__rl": true, "mode": "id", "value": "app8cwZVO7nUF6ErS" },
+        "table": { "__rl": true, "mode": "id", "value": "tbl5JEP9PGG8aYuHx" },
         "columns": {
           "mappingMode": "defineBelow",
-          "value": {
-            "id": "={{ $('טריגר ליד חדש').item.json.id }}",
-            "Status": "New"
-          },
+          "value": { "id": "={{ $json.id }}", "Status": "New" },
           "schema": [
-            {
-              "id": "id",
-              "displayName": "id",
-              "required": false,
-              "defaultMatch": true,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Status",
-              "displayName": "Status",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": false
-            }
+            { "id": "id", "displayName": "id", "required": false, "defaultMatch": true, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Status", "displayName": "Status", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false }
           ],
-          "matchingColumns": [
-            "id"
-          ]
+          "matchingColumns": ["id"]
         },
         "options": {}
       },
       "credentials": {
-        "airtableTokenApi": {
-          "id": "QbC6k0gPl10eEHOV",
-          "name": "Airtable Personal Access Token account"
-        }
+        "airtableTokenApi": { "id": "QbC6k0gPl10eEHOV", "name": "Airtable Personal Access Token account" }
+      }
+    },
+    {
+      "id": "note-wf3",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-912, -220],
+      "parameters": {
+        "width": 900,
+        "height": 200,
+        "content": "## WF3 - קליטת אנשי קשר וסינון כפילויות\nטריגר: Airtable polling כל דקה על טבלת Leads (שדה Created).\n1) מחפש רשומות עם אותו אימייל (לכל ליד בנפרד, גם כשמעולים נוצרו באותה דקה).\n2) node קוד סופר את ההתאמות בנפרד לכל ליד עצמו (ולא סך כל ה-batch ביחד - תיקון לבאג שהיה עד 22.9, שהחליף עם נוד Summarize ושבר כשנוצרו עד 2+ לידים באותה דקה).\n3) יותר מהתאמה אחת לאותו ליד בפועל → Status=Duplicate. אחרת → Status=New (מזין את WF4a)."
       }
     }
   ],
   "connections": {
     "טריגר ליד חדש": {
-      "main": [
-        [
-          {
-            "node": "חיפוש כפילויות לפי אימייל",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "חיפוש כפילויות לפי אימייל", "type": "main", "index": 0 }]]
     },
     "חיפוש כפילויות לפי אימייל": {
-      "main": [
-        [
-          {
-            "node": "ספירת התאמות",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "בדיקת כפילות לכל ליד", "type": "main", "index": 0 }]]
     },
-    "ספירת התאמות": {
-      "main": [
-        [
-          {
-            "node": "כפילות",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+    "בדיקת כפילות לכל ליד": {
+      "main": [[{ "node": "כפילות", "type": "main", "index": 0 }]]
     },
     "כפילות": {
       "main": [
-        [
-          {
-            "node": "סימון כפילות",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "סימון ליד חדש",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [{ "node": "סימון כפילות", "type": "main", "index": 0 }],
+        [{ "node": "סימון ליד חדש", "type": "main", "index": 0 }]
       ]
     }
   },
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "errorWorkflow": "K6l2pJUO5j0bGkeb"
   },
-  "staticData": {
-    "node:טריגר ליד חדש": {
-      "lastTimeChecked": "2026-09-17T05:15:03Z"
-    }
-  },
+  "staticData": null,
   "pinData": {},
   "meta": {
     "templateCredsSetupCompleted": true

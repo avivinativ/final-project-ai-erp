@@ -506,6 +506,18 @@
         -672,
         240
       ]
+    },
+    {
+      "id": "note-wf4b",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-1264, -220],
+      "parameters": {
+        "width": 1500,
+        "height": 180,
+        "content": "## WF4b - סוכן מכירות: בדיקת תשובות\nטריגר: Gmail polling כל 30 דקות על הודעות שלא נקראו בתיבה.\n1) מחלץ את כתובת האימייל של השולח מההודעה.\n2) מאתר ליד תואם בטבלת Leads (מסנן: רק אם נמצא ליד).\n3) סוכן AI מסווג את התגובה: INTERESTED / NOT_INTERESTED / QUESTION.\n4) מנתב (Switch) לעדכון הסטטוס המתאים בליד; קטגוריה לא ברורה → Needs Review לבדיקה ידנית."
+      }
     }
   ],
   "connections": {
@@ -622,7 +634,8 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "errorWorkflow": "K6l2pJUO5j0bGkeb"
   },
   "staticData": {
     "node:בדיקת תשובות": {

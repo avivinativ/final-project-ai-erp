@@ -160,6 +160,19 @@
         }
       }
     }
+    ,
+    {
+      "id": "note-wf1",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [0, -220],
+      "parameters": {
+        "width": 700,
+        "height": 180,
+        "content": "## WF1 - אימות מסמכי מס\nטריגר: Airtable polling כל דקה על טבלת Invoices (שדה Created).\n1) מחשב מע\"מ (18% מ-1.1.2025 ואילך, 17% לפני) וסה\"כ לתשלום.\n2) בונה מספר חשבונית ייחודי מבוסס זמן (INV-YYYYMMDDHHmm) - נמנע מהתנגשויות מספור בין חשבוניות שנוצרות בו-זמנית.\n3) מסמן Status=ValidatedQueued.\nהפלט מוזן ל-WF8 (הפקת המסמך)."
+      }
+    }
   ],
   "connections": {
     "טריגר חשבוניות חדשות": {
@@ -172,7 +185,8 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "errorWorkflow": "K6l2pJUO5j0bGkeb"
   },
   "staticData": null,
   "pinData": {},
