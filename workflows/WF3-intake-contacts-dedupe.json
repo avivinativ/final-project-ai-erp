@@ -116,7 +116,7 @@
                 "type": "number",
                 "operation": "gt"
               },
-              "rightValue": 0,
+              "rightValue": 1,
               "id": "condition-1789622102520-ryee5s9rq"
             }
           ],

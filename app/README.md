@@ -53,7 +53,14 @@ All 10 live on the self-hosted n8n instance (`n8n.nativ-ai.co.il`). Numbering is
 - Airtable triggers poll at minimum 1-minute resolution; two invoices created in the same minute can race on invoice numbering.
 - No retries/error handling in the workflows — a red execution in n8n's Executions tab is expected behavior on failure, not a bug to silently swallow.
 - Single-user app, no auth, no cache — Airtable's API rate limit (~5 req/s) is the practical ceiling for a heavier dashboard.
+- `npm run dev` runs `next dev --webpack` on purpose — Turbopack (Next.js 16's default) crashes on at least one Windows setup with `0xc0000142` while spawning the Node worker that evaluates `@tailwindcss/postcss`. Webpack mode avoids that code path entirely; no functional difference for this app.
 
 ## Status
 
-Last verified end-to-end 2026-09-17 after migrating n8n from n8n Cloud to a self-hosted Docker instance: webhook URL updated, WF3 and WF4a field-reference bugs fixed, vector store repopulated. See the project checklist artifact for the full build log.
+Last verified end-to-end 2026-09-22: full chain re-tested live (not just read from code) —
+- **n8n**: found and fixed two real bugs — WF3's duplicate-check counted the new lead against itself, so every lead (including the first ever) was wrongly marked `Duplicate` and never reached the sales pipeline (now requires >1 match); WF8's Google Drive upload node had an empty `folderId`, causing every invoice upload to 404 (now points at Drive root). Activated WF1, WF3, WF4b, WF5, WF8, WF9, WF13 (WF4a intentionally left off — it emails real leads on a schedule, pending a decision to enable it; WF6/WF7 correctly stay manual-only).
+- **RAG**: confirmed live via a real chat query — the policy and product vector stores are both populated and answering correctly right now. Still re-run WF6 then WF7 manually right before any demo, since a restart wipes them silently.
+- **App**: fixed two local setup bugs — `.env.local` was sitting one directory up from where Next.js actually reads it (`app/.env.local` was missing entirely), and `app/node_modules` didn't exist (only the wrong directory had one, from an earlier incomplete restructure). Both fixed; `npm install` now works from `app/` as documented above.
+- **End-to-end through the actual UI**: dashboard loads real Airtable data, and the chat page got a real RAG-backed answer through the full path (browser → this app → WF13 webhook → agent → reply rendered on screen).
+
+Previous note (2026-09-17): migrated n8n from n8n Cloud to a self-hosted Docker instance, webhook URL updated. See the project checklist artifact for the full build log.

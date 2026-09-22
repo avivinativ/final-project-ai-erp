@@ -1,0 +1,9 @@
+# Leftovers from an earlier restructure (the real Next.js app now lives in app/).
+# These should never be tracked - the app's own .gitignore covers app/ itself.
+.env.local
+.env.*.local
+node_modules/
+.next/
+next-env.d.ts
+*.tsbuildinfo
+tsconfig.json
