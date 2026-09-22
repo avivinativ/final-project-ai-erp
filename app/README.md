@@ -50,6 +50,7 @@ All 10 live on the self-hosted n8n instance (`n8n.nativ-ai.co.il`). Numbering is
 
 - **The vector store is in-memory only** — it's wiped on every n8n restart (including redeploys of the Docker container). Re-run **WF6 then WF7** manually (Execute workflow) after any restart, or the chat agents' product/policy search returns empty results.
 - No PDF conversion — invoices are saved as HTML to Drive; convert manually via Google Docs → Download → PDF if a real PDF is needed.
+- Google Drive's own preview never renders uploaded `.html` files inline — clicking a `PdfUrl` link shows raw source, regardless of the file's declared MIME type (verified live: the uploaded file is valid HTML with `mimeType: text/html` correctly set, and downloading it and opening it locally renders fine). This is a Drive platform restriction, not a workflow bug — use "Open with Google Docs" from the Drive file page, or download the file, to see it rendered.
 - Airtable triggers poll at minimum 1-minute resolution; two invoices created in the same minute can race on invoice numbering.
 - No retries/error handling in the workflows — a red execution in n8n's Executions tab is expected behavior on failure, not a bug to silently swallow.
 - Single-user app, no auth, no cache — Airtable's API rate limit (~5 req/s) is the practical ceiling for a heavier dashboard.
@@ -93,14 +94,23 @@ All 10 live on the self-hosted n8n instance (`n8n.nativ-ai.co.il`). Numbering is
   The 2 seeded invoices are sitting in `ValidatedQueued`, ready to be picked up the moment WF8
   is reactivated.
 - **User reconnected the Google Drive credential and reactivated WF8 manually** — the resulting
-  file was raw HTML markup displayed as plain text instead of a rendered page. Root cause: the
-  Google Drive node used `createFromText`, which always uploads as `text/plain` regardless of
-  the `.html` filename — Drive's preview reads the actual MIME type, not the extension. Fixed by
-  inserting a **Convert to File** node (`toText`, explicit `options.mimeType: "text/html"`)
-  before the Drive node and switching it from `createFromText` to `upload` (binary). Requeued the
-  2 already-processed invoices back to `ValidatedQueued` and confirmed the workflow regenerated
-  them with new Drive file IDs. The 2 old broken files are still sitting in Drive under the
-  previous file IDs and are safe to delete manually.
+  file was raw HTML markup displayed as plain text instead of a rendered page. Root cause
+  investigated: the Google Drive node used `createFromText`, which always uploads as
+  `text/plain` regardless of the `.html` filename. Fixed by inserting a **Convert to File** node
+  (`toText`, explicit `options.mimeType: "text/html"`) before the Drive node and switching it
+  from `createFromText` to `upload` (binary) — this part of the fix is real and live (verified:
+  downloading a newly-generated file and opening it locally renders correctly as formatted RTL
+  Hebrew HTML).
+- **2026-09-22, later still — corrected an inaccurate claim above**: re-tested live and found
+  Drive's own in-browser preview *still* shows raw source for the regenerated files too — turns
+  out Google Drive does not render arbitrary uploaded `.html` files inline in its preview **at
+  all**, independent of the declared MIME type. That's a Drive platform restriction (a phishing/
+  XSS protection), not something WF8 can fix. The earlier claim that this was "fixed and
+  verified live" was wrong about the visible symptom — it verified the file content and MIME
+  type, not what Drive's preview pane actually renders. Requeued the 2 seeded invoices to
+  `ValidatedQueued` again; WF8 regenerated them with new file IDs (old broken-preview files are
+  still in Drive and safe to delete). Updated the root README's known-limitations section with
+  the accurate explanation and the workaround (download the file, or "Open with Google Docs").
 
 Last verified end-to-end 2026-09-22 (earlier pass): full chain re-tested live (not just read from code) —
 - **n8n**: found and fixed two real bugs — WF3's duplicate-check counted the new lead against itself, so every lead (including the first ever) was wrongly marked `Duplicate` and never reached the sales pipeline (now requires >1 match); WF8's Google Drive upload node had an empty `folderId`, causing every invoice upload to 404 (now points at Drive root). Activated WF1, WF3, WF4b, WF5, WF8, WF9, WF13 (WF4a intentionally left off — it emails real leads on a schedule, pending a decision to enable it; WF6/WF7 correctly stay manual-only).
