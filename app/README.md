@@ -92,6 +92,15 @@ All 10 live on the self-hosted n8n instance (`n8n.nativ-ai.co.il`). Numbering is
   which this session can't do) — see the root [README's known-limitations section](../README.md).
   The 2 seeded invoices are sitting in `ValidatedQueued`, ready to be picked up the moment WF8
   is reactivated.
+- **User reconnected the Google Drive credential and reactivated WF8 manually** — the resulting
+  file was raw HTML markup displayed as plain text instead of a rendered page. Root cause: the
+  Google Drive node used `createFromText`, which always uploads as `text/plain` regardless of
+  the `.html` filename — Drive's preview reads the actual MIME type, not the extension. Fixed by
+  inserting a **Convert to File** node (`toText`, explicit `options.mimeType: "text/html"`)
+  before the Drive node and switching it from `createFromText` to `upload` (binary). Requeued the
+  2 already-processed invoices back to `ValidatedQueued` and confirmed the workflow regenerated
+  them with new Drive file IDs. The 2 old broken files are still sitting in Drive under the
+  previous file IDs and are safe to delete manually.
 
 Last verified end-to-end 2026-09-22 (earlier pass): full chain re-tested live (not just read from code) —
 - **n8n**: found and fixed two real bugs — WF3's duplicate-check counted the new lead against itself, so every lead (including the first ever) was wrongly marked `Duplicate` and never reached the sales pipeline (now requires >1 match); WF8's Google Drive upload node had an empty `folderId`, causing every invoice upload to 404 (now points at Drive root). Activated WF1, WF3, WF4b, WF5, WF8, WF9, WF13 (WF4a intentionally left off — it emails real leads on a schedule, pending a decision to enable it; WF6/WF7 correctly stay manual-only).

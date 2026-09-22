@@ -2,59 +2,40 @@
   "name": "WF8 - הפקת מסמך חשבונית והעלאה לדרייב",
   "nodes": [
     {
-      "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "field": "minutes",
-              "minutesInterval": 1
-            }
-          ]
-        }
-      },
       "id": "1b5fdf3c-cbd7-4db5-9677-2678631b8efb",
       "name": "כל דקה",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.4,
-      "position": [
-        0,
-        0
-      ]
+      "position": [0, 0],
+      "parameters": {
+        "rule": { "interval": [{ "field": "minutes", "minutesInterval": 1 }] }
+      }
     },
     {
+      "id": "d6e482f9-b27a-4ca5-9c41-f09dab67f9ec",
+      "name": "שליפת חשבוניות בתור",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [224, 0],
       "parameters": {
         "operation": "search",
-        "base": {
-          "__rl": true,
-          "mode": "id",
-          "value": "app8cwZVO7nUF6ErS"
-        },
-        "table": {
-          "__rl": true,
-          "mode": "id",
-          "value": "tbliF2WhmHvgKHlMg"
-        },
+        "base": { "__rl": true, "mode": "id", "value": "app8cwZVO7nUF6ErS" },
+        "table": { "__rl": true, "mode": "id", "value": "tbliF2WhmHvgKHlMg" },
         "filterByFormula": "{Status} = 'ValidatedQueued'",
         "returnAll": false,
         "limit": 5,
         "options": {}
       },
-      "id": "d6e482f9-b27a-4ca5-9c41-f09dab67f9ec",
-      "name": "שליפת חשבוניות בתור",
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.2,
-      "position": [
-        224,
-        0
-      ],
       "credentials": {
-        "airtableTokenApi": {
-          "id": "QbC6k0gPl10eEHOV",
-          "name": "Airtable Personal Access Token account"
-        }
+        "airtableTokenApi": { "id": "QbC6k0gPl10eEHOV", "name": "Airtable Personal Access Token account" }
       }
     },
     {
+      "id": "324b6399-57b5-46dd-94f8-2fba8db6f10d",
+      "name": "בניית HTML",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [448, 0],
       "parameters": {
         "assignments": {
           "assignments": [
@@ -68,21 +49,34 @@
         },
         "includeOtherFields": true,
         "options": {}
-      },
-      "id": "324b6399-57b5-46dd-94f8-2fba8db6f10d",
-      "name": "בניית HTML",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.5,
-      "position": [
-        448,
-        0
-      ]
+      }
     },
     {
+      "id": "conv-to-file-1",
+      "name": "המרה לקובץ HTML",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [640, 0],
       "parameters": {
-        "operation": "createFromText",
-        "content": "={{ $json.invoiceHtml }}",
-        "name": "={{ $json.fields.InvoiceNumber + \".html\" }}",
+        "operation": "toText",
+        "sourceProperty": "invoiceHtml",
+        "binaryPropertyName": "data",
+        "options": {
+          "fileName": "={{ $json.fields.InvoiceNumber + '.html' }}",
+          "mimeType": "text/html"
+        }
+      }
+    },
+    {
+      "id": "90225a3e-62fd-4fd9-bb22-571da947fa08",
+      "name": "העלאה לדרייב",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [864, 0],
+      "parameters": {
+        "operation": "upload",
+        "name": "={{ $json.fields.InvoiceNumber + '.html' }}",
+        "inputDataFieldName": "data",
         "driveId": {
           "__rl": true,
           "mode": "list",
@@ -99,34 +93,20 @@
         },
         "options": {}
       },
-      "id": "90225a3e-62fd-4fd9-bb22-571da947fa08",
-      "name": "העלאה לדרייב",
-      "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 3,
-      "position": [
-        672,
-        0
-      ],
       "credentials": {
-        "googleDriveOAuth2Api": {
-          "id": "hX7kWjSrQx00H4Yk",
-          "name": "Google Drive account"
-        }
+        "googleDriveOAuth2Api": { "id": "hX7kWjSrQx00H4Yk", "name": "Google Drive account" }
       }
     },
     {
+      "id": "0b8daf9c-3a7d-4b4d-a369-c012b73555b1",
+      "name": "עדכון חשבונית שהופקה",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [1088, 0],
       "parameters": {
         "operation": "update",
-        "base": {
-          "__rl": true,
-          "mode": "id",
-          "value": "app8cwZVO7nUF6ErS"
-        },
-        "table": {
-          "__rl": true,
-          "mode": "id",
-          "value": "tbliF2WhmHvgKHlMg"
-        },
+        "base": { "__rl": true, "mode": "id", "value": "app8cwZVO7nUF6ErS" },
+        "table": { "__rl": true, "mode": "id", "value": "tbliF2WhmHvgKHlMg" },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
@@ -135,53 +115,16 @@
             "Status": "Invoiced"
           },
           "schema": [
-            {
-              "id": "id",
-              "displayName": "id",
-              "required": false,
-              "defaultMatch": true,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "PdfUrl",
-              "displayName": "PdfUrl",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": false
-            },
-            {
-              "id": "Status",
-              "displayName": "Status",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": false
-            }
+            { "id": "id", "displayName": "id", "required": false, "defaultMatch": true, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "PdfUrl", "displayName": "PdfUrl", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "Status", "displayName": "Status", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false }
           ],
-          "matchingColumns": [
-            "id"
-          ]
+          "matchingColumns": ["id"]
         },
         "options": {}
       },
-      "id": "0b8daf9c-3a7d-4b4d-a369-c012b73555b1",
-      "name": "עדכון חשבונית שהופקה",
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.2,
-      "position": [
-        880,
-        0
-      ],
       "credentials": {
-        "airtableTokenApi": {
-          "id": "QbC6k0gPl10eEHOV",
-          "name": "Airtable Personal Access Token account"
-        }
+        "airtableTokenApi": { "id": "QbC6k0gPl10eEHOV", "name": "Airtable Personal Access Token account" }
       }
     },
     {
@@ -189,58 +132,29 @@
       "name": "Sticky Note",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [0, -220],
+      "position": [0, -240],
       "parameters": {
-        "width": 900,
-        "height": 180,
-        "content": "## WF8 - הפקת חשבונית והעלאה לדרייב\nטריגר: Schedule כל דקה.\n1) שולף עד 5 חשבוניות בסטטוס ValidatedQueued (מוזנות ע\"י WF1).\n2) בונה מסמך HTML בעברית (RTL) עם פרטי הלקוח, סכום, מע\"מ וסה\"כ.\n3) מעלה כקובץ לגוגל דרייב.\n4) מעדכן PdfUrl ו-Status=Invoiced בחשבונית.\nהערה: המסמך הוא HTML, לא PDF אמיתי - המרה ידנית דרך Google Docs במידת הצורך."
+        "width": 1100,
+        "height": 200,
+        "content": "## WF8 - הפקת חשבונית והעלאה לדרייב\nטריגר: Schedule כל דקה.\n1) שולף עד 5 חשבוניות בסטטוס ValidatedQueued.\n2) בונה מסמך HTML בעברית (RTL).\n3) עדכון 22.9: ממיר את הטקסט לקובץ בינארי עם mimeType=text/html מפורש (Convert to File), ומעלה אותו ל-Drive דרך operation=upload במקום createFromText - תיקון לבאג: createFromText העלה תמיד כ-text/plain בלי תלות בסיומת הקובץ, ודרייב הציג את ה-HTML כטקסט גולמי במקום לרנדר אותו.\n4) מעדכן PdfUrl ו-Status=Invoiced.\nהערה: עדיין HTML ולא PDF אמיתי - המרה ידנית דרך Google Docs במידת הצורך."
       }
     }
   ],
   "connections": {
     "כל דקה": {
-      "main": [
-        [
-          {
-            "node": "שליפת חשבוניות בתור",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "שליפת חשבוניות בתור", "type": "main", "index": 0 }]]
     },
     "שליפת חשבוניות בתור": {
-      "main": [
-        [
-          {
-            "node": "בניית HTML",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "בניית HTML", "type": "main", "index": 0 }]]
     },
     "בניית HTML": {
-      "main": [
-        [
-          {
-            "node": "העלאה לדרייב",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "המרה לקובץ HTML", "type": "main", "index": 0 }]]
+    },
+    "המרה לקובץ HTML": {
+      "main": [[{ "node": "העלאה לדרייב", "type": "main", "index": 0 }]]
     },
     "העלאה לדרייב": {
-      "main": [
-        [
-          {
-            "node": "עדכון חשבונית שהופקה",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "עדכון חשבונית שהופקה", "type": "main", "index": 0 }]]
     }
   },
   "settings": {
@@ -249,16 +163,7 @@
     "availableInMCP": true,
     "errorWorkflow": "K6l2pJUO5j0bGkeb"
   },
-  "staticData": {
-    "node:כל דקה": {
-      "recurrenceRules": [
-        null
-      ],
-      "recurrenceRuleSignatures": [
-        null
-      ]
-    }
-  },
+  "staticData": null,
   "pinData": {},
   "meta": {
     "templateCredsSetupCompleted": true
